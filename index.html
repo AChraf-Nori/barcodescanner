@@ -46,12 +46,7 @@
         // Adjust patch size and half-sample settings for better speed
             patchSize: "medium",  // Use 'medium' for better balance between speed and accuracy
             halfSample: true,  // Reduce image resolution for faster processing
-             area: {             // Define scanning area within the video frame
-                top: "30%",      // Start 30% down from the top of the video stream
-                left: "5%",      // Start 5% in from the left of the video stream
-                width: "90%",    // Focus on 90% of the video width
-                height: "40%"    // Focus on 40% of the video height (center of the stream)
-            }
+             
         },
         numOfWorkers: 2,  // Use 2 workers for better parallel processing (keep this low for low-end devices)
         frequency: 10, // Frequency of barcode scanning (lower it for performance)
