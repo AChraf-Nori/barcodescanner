@@ -1,151 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner</title>
+    <meta charset="utf-8"/>
+    <title>QuaggaJS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
     <style>
-        /* Styling for the result and video elements */
-        #video-container {
-            display: none;
-            position: relative;
-            border: 1px solid black;
-            border-radius: 5px;
-        }
-        
-        #result {
-            display: none;
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 10px;
+        #camera video{
+            width:100%;
+            max-width: 640px;
         }
     </style>
 </head>
+
 <body>
-    <h1>Barcode Scanner</h1>
-    <button id="start-scan-button">Start Scanning</button>
+<div id="camera" style="width:100%"></div>
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+<script>
 
-    <!-- Video stream container -->
-    <div id="video-container">
-        <div id="guideScanner" style="display: none;">Scanning...</div>
-    </div>
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            console.log(position.coords.longitude)
+            console.log(position.coords.latitude)
 
-    <!-- Paragraph to show the result -->
-    <p id="result">Code: <span id="scanned-code"></span></p>
+        }
+    )
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-    <script>
-        // Function to start the scanning process
-        function startScan() {
-            const resultElement = document.getElementById('result');
-            const videoContainer = document.getElementById('video-container');
-            const startButton = document.getElementById('start-scan-button');
-            const resultParagraph = document.getElementById('scanned-code');
 
-            // Hide the result initially
-            resultElement.style.display = 'none';
-
-            // Start the video stream when the button is clicked
-            async function getEnvironmentCamera() {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter((device) => device.kind === "videoinput");
-
-                const environmentCamera = videoDevices.find(
-                    (device) => device.label.toLowerCase().includes("back") || device.label.toLowerCase().includes("rear")
-                );
-
-                return environmentCamera ? environmentCamera.deviceId : undefined;
+    const quaggaConf = {
+        inputStream: {
+            target: document.querySelector("#camera"),
+            type: "LiveStream",
+            constraints: {
+                width: { min: 640 },
+                height: { min: 480 },
+                facingMode: "environment",
+                aspectRatio: { min: 1, max: 2 }
             }
+        },
+        decoder: {
+            readers: ['code_39_reader']
+        },
+    }
 
-            getEnvironmentCamera().then((cameraId) => {
-                // Initialize Quagga with optimized settings
-                Quagga.init(
-                    {
-                        inputStream: {
-                            name: "Live",
-                            type: "LiveStream",
-                            target: videoContainer,
-                            constraints: {
-                                width: 520,  // Lower resolution for faster processing
-                                height: 240, // Lower resolution for faster processing
-                                deviceId: cameraId || undefined,
-                                facingMode: { ideal: "environment" }, // Use the rear camera
-                            },
-                        },
-                        decoder: {
-                            readers: ["code_39_reader"], // Use code 39 reader
-                        },
-                        locate: true,
-                        locator: { patchSize: "small", halfSample: true },
-                        numOfWorkers: 2, // Fewer workers for speed
-                        frequency: 30, // Fast frequency for quicker processing
-                        debug: false, // Disable debug
-                    },
-                    function (err) {
-                        if (err) {
-                            console.error("Quagga initialization error: ", err);
-                            return;
-                        }
-                        console.log("QuaggaJS initialized successfully.");
-                        Quagga.start(); // Start the scanner
-                    }
-                );
-
-                // Show video container
-                videoContainer.style.display = 'block';
-
-                // Use requestAnimationFrame for smooth frame processing
-                function scanFrame() {
-                    requestAnimationFrame(scanFrame); // Keep scanning frames
-                    Quagga.decodeSingle({
-                        src: videoContainer,  // The video element as source
-                        numOfWorkers: 2, // Use 2 workers for better speed
-                        inputStream: {
-                            size: 640, // Keep the size lower for faster processing
-                        },
-                        decoder: {
-                            readers: ['code_39_reader'], // Code 39 reader
-                        },
-                    }, (result) => {
-                        if (result) {
-                            // Display the result
-                            resultElement.style.display = 'block'; // Show the result paragraph
-                            resultParagraph.innerText = result.codeResult.code; // Set the result text
-                            alert(result.codeResult.code)
-
-                            // Beep sound on success
-                            const beepSound = new Audio('https://www.soundjay.com/button/beep-07.wav');
-                            beepSound.play().then(() => {
-                                Quagga.stop(); // Stop scanning after barcode detection
-                                stopScan(); // Custom function to stop scan
-                                removeVideoElement(); // Remove the video element
-                            }).catch((error) => {
-                                console.error("Error playing beep sound:", error);
-                            });
-                        }
-                    });
-                }
-
-                // Start the scanning loop
-                scanFrame();
-            });
+    Quagga.init(quaggaConf, function (err) {
+        if (err) {
+            return console.log(err);
         }
+        Quagga.start();
+    });
 
-        // Stop scanning (custom function)
-        function stopScan() {
-            const startButton = document.getElementById('start-scan-button');
-            startButton.disabled = false; // Enable the start button again after scan completes
-        }
-
-        // Remove the video element (custom function)
-        function removeVideoElement() {
-            // const videoElement = document.getElementById('video');
-            // videoElement.srcObject.getTracks().forEach(track => track.stop()); // Stop the video tracks
-            document.getElementById('video-container').style.display = 'none'; // Hide video container
-        }
-
-        // Attach startScan function to the button click
-        document.getElementById('start-scan-button').addEventListener('click', startScan);
-    </script>
+    Quagga.onDetected(function (result) {
+        alert("Detected barcode: " + result.codeResult.code);
+    });
+</script>
 </body>
 </html>
