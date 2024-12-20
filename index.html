@@ -36,7 +36,7 @@
 
 
     function startScan() {
-                    document.querySelector("#camera").style.display = "block"
+                    // document.querySelector("#camera").style.display = "block"
                             document.getElementById("#result").innerHTML = "Result: "
 
 
@@ -66,8 +66,8 @@
         Quagga.onDetected(function (result) {
             alert("Detected barcode: " + result.codeResult.code);
             Quagga.stop()
-            document.querySelector("#camera").style.display = "none"
-            document.getElementById("#result").innerHTML = `Result: ${result.codeResult.code}
+            // document.querySelector("#camera").style.display = "none"
+            document.getElementById("#result").innerHTML = `Result: ${result.codeResult.code}`
 
         });
     }
