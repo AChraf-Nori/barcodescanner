@@ -100,7 +100,7 @@
                 function scanFrame() {
                     requestAnimationFrame(scanFrame); // Keep scanning frames
                     Quagga.decodeSingle({
-                        src: videoElement,  // The video element as source
+                        src: videoContainer,  // The video element as source
                         numOfWorkers: 2, // Use 2 workers for better speed
                         inputStream: {
                             size: 640, // Keep the size lower for faster processing
