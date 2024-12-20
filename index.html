@@ -8,6 +8,9 @@
         #camera video{
             width:100%;
             max-width: 640px;
+        } 
+        video {
+            height: 150px;
         }
     </style>
 </head>
@@ -17,6 +20,7 @@
         Start Scanner
     </button>
     <div id="camera" style="width:100%"></div>
+    <h2 id="result">Result: </h2>
 <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
 <script>
 
@@ -32,6 +36,10 @@
 
 
     function startScan() {
+                    document.querySelector("#camera").style.display = "block"
+                            document.getElementById("#result").innerHTML = "Result: "
+
+
         const quaggaConf = {
             inputStream: {
                 target: document.querySelector("#camera"),
@@ -59,6 +67,8 @@
             alert("Detected barcode: " + result.codeResult.code);
             Quagga.stop()
             document.querySelector("#camera").style.display = "none"
+            document.getElementById("#result").innerHTML = `Result: ${result.codeResult.code}
+
         });
     }
 </script>
