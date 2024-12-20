@@ -1,67 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <title>QuaggaJS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner Centered</title>
     <style>
-        #camera video{
-            width:100%;
-            max-width: 640px;
+        /* Style to display the scanning area (a square) */
+        #scanner-overlay {
+            position: absolute;
+            top: 30%; /* 30% from the top of the video */
+            left: 5%;  /* 5% from the left */
+            width: 90%; /* 90% of the width of the video */
+            height: 40%; /* 40% of the height of the video */
+            border: 2px solid red;
+            pointer-events: none;  /* Prevent the overlay from interfering with video interaction */
         }
     </style>
 </head>
-
 <body>
-<div id="camera" style="width:100%"></div>
-<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
-<script>
+    <div id="scanner-overlay"></div> <!-- Square overlay -->
+    <video id="camera" width="640" height="480" autoplay></video> <!-- Video feed -->
+    <button id="scan-btn">Start Scanning</button>
+    <p id="result"></p>
 
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            console.log(position.coords.longitude)
-            console.log(position.coords.latitude)
+    <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
+    <script>
+        // Start scanning when the button is clicked
+        document.getElementById('scan-btn').addEventListener('click', startScan);
 
+        function startScan() {
+            // Define the region of interest (ROI) as a square inside the video stream
+            const quaggaConf = {
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector("#camera"),
+                    constraints: {
+                        width: { min: 640 },  // Adjust to your desired resolution
+                        height: { min: 480 },
+                        facingMode: "environment",
+                    },
+                    // Define the area where Quagga should look for the barcode (centered region)
+                    area: { // Relative percentages of the video stream
+                        top: "30%",    // 30% from the top of the video (centered vertically)
+                        left: "5%",    // 5% from the left of the video
+                        bottom: "70%", // 70% from the top (making it 40% height centered)
+                        right: "95%"   // 95% from the left (making it 90% width centered)
+                    },
+                },
+                decoder: {
+                    readers: ["code_39_reader", "ean_reader", "upc_reader"], // Only the barcodes you need
+                },
+                locator: {
+                    patchSize: "small",  // Use a smaller patch size for speed
+                    halfSample: true,    // Use half-sampling to speed up detection
+                },
+                numOfWorkers: 2, // 2 workers for parallel processing
+                frequency: 10,  // Frequency of detection checks
+                debug: false,  // Disable debug for better performance
+            };
+
+            // Initialize QuaggaJS
+            Quagga.init(quaggaConf, function (err) {
+                if (err) {
+                    console.error("Error initializing Quagga:", err);
+                    return;
+                }
+                Quagga.start();
+            });
+
+            // Handle the result of barcode detection
+            Quagga.onDetected(function (result) {
+                const code = result.codeResult.code;
+                document.getElementById("result").textContent = `Detected barcode: ${code}`;
+                Quagga.stop(); // Stop the scanner once barcode is detected
+            });
         }
-    )
-
-
-    const quaggaConf = {
-        inputStream: {
-            target: document.querySelector("#camera"),
-            type: "LiveStream",
-            constraints: {
-                width: { min: 640 },
-                height: { min: 240 },
-                facingMode: "environment",
-                aspectRatio: { min: 1, max: 2 }
-            },
-            frameRate: 30,  // Increase frame rate for better responsiveness
-            
-        },
-        decoder: {
-            readers: ['code_39_reader']
-        },
-         locator: {
-        // Adjust patch size and half-sample settings for better speed
-            patchSize: "medium",  // Use 'medium' for better balance between speed and accuracy
-            halfSample: true,  // Reduce image resolution for faster processing
-        },
-        numOfWorkers: 2,  // Use 2 workers for better parallel processing (keep this low for low-end devices)
-        frequency: 10, // Frequency of barcode scanning (lower it for performance)
-        debug: false, // Disable debugging for better performance
-    }
-
-    Quagga.init(quaggaConf, function (err) {
-        if (err) {
-            return console.log(err);
-        }
-        Quagga.start();
-    });
-
-    Quagga.onDetected(function (result) {
-        alert("Detected barcode: " + result.codeResult.code);
-    });
-</script>
+    </script>
 </body>
 </html>
