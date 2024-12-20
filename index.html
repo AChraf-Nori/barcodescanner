@@ -27,7 +27,6 @@
 
     <!-- Video stream container -->
     <div id="video-container">
-        <video id="video" width="320" height="240" autoplay="true" preload="auto"></video>
         <div id="guideScanner" style="display: none;">Scanning...</div>
     </div>
 
@@ -40,7 +39,6 @@
         function startScan() {
             const resultElement = document.getElementById('result');
             const videoContainer = document.getElementById('video-container');
-            const videoElement = document.getElementById('video');
             const startButton = document.getElementById('start-scan-button');
             const resultParagraph = document.getElementById('scanned-code');
 
@@ -68,7 +66,7 @@
                             type: "LiveStream",
                             target: videoContainer,
                             constraints: {
-                                width: 320,  // Lower resolution for faster processing
+                                width: 520,  // Lower resolution for faster processing
                                 height: 240, // Lower resolution for faster processing
                                 deviceId: cameraId || undefined,
                                 facingMode: { ideal: "environment" }, // Use the rear camera
@@ -113,6 +111,7 @@
                             // Display the result
                             resultElement.style.display = 'block'; // Show the result paragraph
                             resultParagraph.innerText = result.codeResult.code; // Set the result text
+                            alert(result.codeResult.code)
 
                             // Beep sound on success
                             const beepSound = new Audio('https://www.soundjay.com/button/beep-07.wav');
@@ -140,8 +139,8 @@
 
         // Remove the video element (custom function)
         function removeVideoElement() {
-            const videoElement = document.getElementById('video');
-            videoElement.srcObject.getTracks().forEach(track => track.stop()); // Stop the video tracks
+            // const videoElement = document.getElementById('video');
+            // videoElement.srcObject.getTracks().forEach(track => track.stop()); // Stop the video tracks
             document.getElementById('video-container').style.display = 'none'; // Hide video container
         }
 
