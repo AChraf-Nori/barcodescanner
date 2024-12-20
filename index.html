@@ -10,14 +10,7 @@
             display: none;
             position: relative;
         }
-        #guideScanner {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px dashed rgba(255, 255, 255, 0.6);
-        }
+        
         #result {
             display: none;
             font-size: 20px;
@@ -45,14 +38,12 @@
         function startScan() {
             const resultElement = document.getElementById('result');
             const videoContainer = document.getElementById('video-container');
-            const guideScanner = document.getElementById('guideScanner');
             const videoElement = document.getElementById('video');
             const startButton = document.getElementById('start-scan-button');
             const resultParagraph = document.getElementById('scanned-code');
 
             // Hide the result initially
             resultElement.style.display = 'none';
-            guideScanner.style.display = 'none';
 
             // Start the video stream when the button is clicked
             async function getEnvironmentCamera() {
@@ -102,7 +93,6 @@
 
                 // Show video container
                 videoContainer.style.display = 'block';
-                guideScanner.style.display = 'block'; // Show the scanning guide
 
                 // Use requestAnimationFrame for smooth frame processing
                 function scanFrame() {
@@ -119,7 +109,6 @@
                     }, (result) => {
                         if (result) {
                             // Display the result
-                            guideScanner.style.display = 'none'; // Hide the guide once barcode is detected
                             resultElement.style.display = 'block'; // Show the result paragraph
                             resultParagraph.innerText = result.codeResult.code; // Set the result text
 
