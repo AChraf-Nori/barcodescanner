@@ -27,31 +27,33 @@
 
 
     const quaggaConf = {
-        inputStream: {
-            target: document.querySelector("#camera"),
-            type: "LiveStream",
-            constraints: {
-                width: { min: 320 },
-                height: { min: 240 },
-                facingMode: "environment",
-                aspectRatio: { min: 1, max: 2 }
-            },
-            frameRate: 30,  // Increase frame rate for better responsiveness
-            
-        },
-        decoder: {
-            readers: ['code_39_reader']
-        },
-         locator: {
-        // Adjust patch size and half-sample settings for better speed
-            patchSize: "medium",  // Use 'medium' for better balance between speed and accuracy
-            halfSample: true,  // Reduce image resolution for faster processing
-             
-        },
-        numOfWorkers: 2,  // Use 2 workers for better parallel processing (keep this low for low-end devices)
-        frequency: 10, // Frequency of barcode scanning (lower it for performance)
-        debug: false, // Disable debugging for better performance
-    }
+       inputStream: {
+              name: "Live",
+              type: "LiveStream",
+              target: document.querySelector('#interactive'),
+              constraints: {
+                  width: 640,
+                  height: 480,
+                  facingMode: "environment",
+                  aspectRatio: { min: 1, max: 2 }
+              },
+              frameRate: 30,  // Increase frame rate for better responsiveness
+          },
+          decoder: {
+              readers: [
+                  "code_128_reader",
+                  "code_39_reader"
+              ]
+          },
+          locate: true, // Enable locating the barcode in the image
+          locator: {
+              patchSize: "medium", // Try different values: "x-small", "small", "medium", "large", "x-large"
+              halfSample: true // Use half sample to improve performance
+          },
+          numOfWorkers: navigator.hardwareConcurrency || 4, // Number of workers for faster processing
+          frequency: 10, // Frequency of frames processing
+          debug: false
+      }
 
     Quagga.init(quaggaConf, function (err) {
         if (err) {
