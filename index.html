@@ -26,11 +26,11 @@
     )
 
 
-    const quaggaConf = {
-       inputStream: {
+    Quagga.init({
+          inputStream: {
               name: "Live",
               type: "LiveStream",
-              target: document.querySelector('#camera'),
+              target: document.querySelector('#interactive'),
               constraints: {
                   width: 640,
                   height: 480,
@@ -53,15 +53,14 @@
           numOfWorkers: navigator.hardwareConcurrency || 4, // Number of workers for faster processing
           frequency: 10, // Frequency of frames processing
           debug: false
-      }
-
-    Quagga.init(quaggaConf, function (err) {
-        if (err) {
-            return console.log(err);
-        }
-        Quagga.start();
-    });
-
+      }, function(err) {
+          if (err) {
+              console.log(err);
+              return;
+          }
+          console.log("QuaggaJS initialized successfully.");
+          Quagga.start();
+      });
     Quagga.onDetected(function (result) {
         alert("Detected barcode: " + result.codeResult.code);
     });
